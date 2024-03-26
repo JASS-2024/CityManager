@@ -12,7 +12,11 @@ struct ContentView: View {
     @State var messages = DataSourceEmpty.messages
     @State var newMessage: String = "This is a new message"
     private var textToSpeechService = TextToSpeechService()
-    
+    @StateObject var speechRecognizer = SpeechRecognizer()
+    private var llmService = MockLLMService()
+
+    @State private var isRecording = false
+    @State private var isThinking = false
     
     var body: some View {
         
@@ -39,9 +43,28 @@ struct ContentView: View {
                 
                 // send new message
                 HStack {
-                    Button(action: sendMessage)   {
-                        Image(systemName: "mic")
-                    }
+                    
+                    Button(action: {
+                        if isRecording {
+                            isRecording = false
+                            newMessage = speechRecognizer.transcript
+                            speechRecognizer.stopTranscribing()
+                            sendMessage(message: speechRecognizer.transcript)
+                        } else {
+                            isRecording = true
+                            speechRecognizer.resetTranscript()
+                            speechRecognizer.startTranscribing()
+                        }
+                    }, label: {
+                        if isRecording {
+                            Image(systemName: "mic.fill")
+                        } else if isThinking {
+                            Image(systemName: "circle.dashed")
+                        } else {
+                            Image(systemName: "mic")
+                        }
+                        
+                    })
                     .buttonStyle(.borderedProminent)
                 }
                 .padding()
@@ -52,17 +75,21 @@ struct ContentView: View {
         
     }
     
-    func sendMessage() {
+    func sendMessage(message: String) {
         
-        if !newMessage.isEmpty{
-            messages.append(Message(content: newMessage, isCurrentUser: true))
-            var systemMessage = "Reply of " + newMessage
-            messages.append(Message(content: systemMessage, isCurrentUser: false))
-            //Text to Speech usage
-            textToSpeechService.setContent(content: systemMessage)
-            textToSpeechService.speak()
-            
-            newMessage = "This is a new message"
+            messages.append(Message(content: message, isCurrentUser: true))
+            DispatchQueue.main.async {
+                Task {
+                    isThinking = true
+                    var response = await llmService.sendMessage(message: message)
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                        messages.append(Message(content: response, isCurrentUser: false))
+                        //Text to Speech usage
+                        textToSpeechService.setContent(content: response)
+                        textToSpeechService.speak()
+                        isThinking = false
+                    }
+                }
         }
     }
 }
