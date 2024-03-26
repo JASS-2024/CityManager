@@ -11,6 +11,7 @@ import SwiftUI
 struct ContentView: View {
     @State var messages = DataSourceEmpty.messages
     @State var newMessage: String = "This is a new message"
+    private var textToSpeechService = TextToSpeechService()
     
     
     var body: some View {
@@ -55,7 +56,12 @@ struct ContentView: View {
         
         if !newMessage.isEmpty{
             messages.append(Message(content: newMessage, isCurrentUser: true))
-            messages.append(Message(content: "Reply of " + newMessage , isCurrentUser: false))
+            var systemMessage = "Reply of " + newMessage
+            messages.append(Message(content: systemMessage, isCurrentUser: false))
+            //Text to Speech usage
+            textToSpeechService.setContent(content: systemMessage)
+            textToSpeechService.speak()
+            
             newMessage = "This is a new message"
         }
     }
