@@ -1,0 +1,15 @@
+name: CityManager
+settings:
+  DEVELOPMENT_TEAM: JASSteam
+targets:
+  SwipeFresh:
+    type: application
+    platform: iOS
+    deploymentTarget:
+      iOS: 16.0
+    sources: [CityManager]
+    settings:
+      TARGETED_DEVICE_FAMILY: 1
+      PRODUCT_NAME: CityManager
+      INFOPLIST_FILE: Supporting/info.plist
+      PRODUCT_BUNDLE_IDENTIFIER: de.tum.cit.ase.university.ios23.fame
