@@ -37,10 +37,10 @@ playground.xcworkspace
 # Swift Package Manager
 #
 # Add this line if you want to avoid checking in source code from Swift Package Manager dependencies.
-# Packages/
-# Package.pins
-# Package.resolved
-# *.xcodeproj
+ Packages/
+ Package.pins
+ Package.resolved
+*.xcodeproj
 #
 # Xcode automatically generates this directory with a .xcworkspacedata file and xcuserdata
 # hence it is not needed unless you have added a package configuration file to your project
@@ -57,7 +57,7 @@ playground.xcworkspace
 # Pods/
 #
 # Add this line if you want to avoid checking in source code from the Xcode workspace
-# *.xcworkspace
+ *.xcworkspace
 
 # Carthage
 #
@@ -88,3 +88,15 @@ fastlane/test_output
 # https://github.com/johnno1962/injectionforxcode
 
 iOSInjectionProject/
+
+## User settings (standard .gitignore for xcode projects)
+xcuserdata/
+ 
+# Add this line if you want to avoid checking in source code from Swift Package Manager dependencies.
+Packages/
+Package.pins
+Package.resolved
+ 
+# Ignore projectfiles now that they are generated
+*.xcodeproj
+*.xcworkspace
