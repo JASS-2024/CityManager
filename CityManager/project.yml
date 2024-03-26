@@ -11,5 +11,5 @@ targets:
     settings:
       TARGETED_DEVICE_FAMILY: 1
       PRODUCT_NAME: CityManager
-      INFOPLIST_FILE: Supporting/info.plist
+      INFOPLIST_FILE: CityManager/Supporting/info.plist
       PRODUCT_BUNDLE_IDENTIFIER: de.tum.cit.ase.university.ios23.fame
