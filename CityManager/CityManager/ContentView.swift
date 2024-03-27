@@ -50,11 +50,14 @@ struct ContentView: View {
                     Button(action: {
                         if isRecording {
                             isRecording = false
-                            newMessage = speechRecognizer.transcript
-                            speechRecognizer.stopTranscribing()
-                            sendMessage(message: speechRecognizer.transcript)
+                            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                                newMessage = speechRecognizer.transcript
+                                speechRecognizer.stopTranscribing()
+                                sendMessage(message: speechRecognizer.transcript)
+                            }
                         } else {
                             isRecording = true
+                            textToSpeechService.stopSpeaking()
                             speechRecognizer.resetTranscript()
                             speechRecognizer.startTranscribing()
                         }
@@ -69,11 +72,18 @@ struct ContentView: View {
                         }
                         
                     })
+                    .foregroundColor(.white)
+                    .disabled(isThinking)
                     .imageScale(.large)
-                    .controlSize(.large)
-                    .buttonStyle(.borderedProminent)
+                    .background(content: {
+                        RoundedRectangle(cornerSize: CGSize(width: 5, height: 5))
+                            .frame(width: 50, height: 50)
+                            .foregroundColor(/*@START_MENU_TOKEN@*/.blue/*@END_MENU_TOKEN@*/)
+                    })
+                    
+                   // .buttonStyle(.borderedProminent)
                 }
-                .padding()
+                .padding(20)
             }
         }
         }
@@ -90,7 +100,6 @@ struct ContentView: View {
     }
     
     func sendMessage(message: String) {
-            textToSpeechService.stopSpeaking()
             messages.append(Message(content: message, isCurrentUser: true))
             DispatchQueue.main.async {
                 Task {

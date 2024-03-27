@@ -14,7 +14,6 @@ struct LoadingButtonView: View {
         Image(systemName: "circle.dashed")
           .foregroundColor(.white)
           .rotationEffect(.degrees(degreesRotating))
-        
           .onAppear {
               withAnimation(.linear(duration: 1)
                   .speed(0.1).repeatForever(autoreverses: false)) {

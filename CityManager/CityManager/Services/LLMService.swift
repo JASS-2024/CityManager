@@ -92,7 +92,7 @@ class LLMService: LLMServiceProtocol {
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.httpBody = createdJSON
-        var result = "ERROR"
+        var result = "ERRORERRORERRORERRORERRORERRORERRORERRORERRORERRORERRORERRORERRORERRORERRORERRORERRORERRORERRORERRORERRORERRORERRORERRORERRORERRORERRORERRORERROR"
         
         do {
             let clock = ContinuousClock()
