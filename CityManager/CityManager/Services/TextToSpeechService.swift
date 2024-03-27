@@ -70,6 +70,12 @@ public class TextToSpeechService {
         setUtterance() // No sequential speaking with same utterance
         self.synthesizer.speak(utterance)
     }
+    
+    func stopSpeaking() {
+        if synthesizer.isSpeaking {
+            self.synthesizer.stopSpeaking(at: .immediate)
+        }
+    }
 
     /// Change language
     func setLanguage(language: String) {

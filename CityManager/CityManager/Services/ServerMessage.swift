@@ -9,4 +9,5 @@ import Foundation
 
 struct ServerMessage : Codable {
     var text: String
+    var username: String
 }
