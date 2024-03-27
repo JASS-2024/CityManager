@@ -65,26 +65,53 @@ class GPTLLMService: LLMServiceProtocol {
 
 class LLMService: LLMServiceProtocol {
     
+    @MainActor
     func sendMessage(message: String) async -> String {
-        guard let url = URL(string: "https://yourserver.com/api/endpoint") else {
-            return "Invalid URL"
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = .prettyPrinted
+        var serverMessage = ServerMessage(text: message)
+        
+        guard let createdJSON = try? encoder.encode(serverMessage) else {
+            print("Failed to create JSON from template")
+            return "ERROR"
         }
+        let url = URL(string: "http://192.168.3.75/request")
         
-        var request = URLRequest(url: url)
+        var request = URLRequest(url: url!)
         request.httpMethod = "POST"
-        request.addValue("text/plain", forHTTPHeaderField: "Content-Type")
-        request.httpBody = message.data(using: .utf8)
-        
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.httpBody = createdJSON
         do {
-            let (data, _) = try await URLSession.shared.data(for: request)
-            if let responseString = String(data: data, encoding: .utf8) {
-                return responseString // Return the response string directly
+            let (data, response) = try await URLSession.shared.data(for: request)
+            
+            if let httpResponse = response as? HTTPURLResponse {
+                print("Response status code: \(httpResponse.statusCode)")
+                
+                // Check if the response indicates success (status code 200-299)
+                if (200...299).contains(httpResponse.statusCode) {
+                    print("Posting succeeded")
+                } else {
+                    print(Thread.callStackSymbols)
+                    print("Posting failed with status code: \(httpResponse.statusCode)")
+                    return "ERROR"
+                }
             } else {
-                return "Failed to decode response"
+                print("1")
+                return "ERROR"
+            }
+            do {
+                let decoder = JSONDecoder()
+                let decodedObject = try decoder.decode(ServerMessage.self, from: data)
+                //printJson(decodedObject)
+                return decodedObject.text
+            } catch {
+                print("2")
+                return "ERROR"
             }
         } catch {
-            print("Request error: \(error)")
-            return "Request error: \(error.localizedDescription)"
+            print("3")
+            return "ERROR"
+            
         }
     }
 }
