@@ -14,14 +14,18 @@ struct ContentView: View {
     private var textToSpeechService = TextToSpeechService()
     @StateObject var speechRecognizer = SpeechRecognizer()
     private var llmService = LLMService()
+    @State private var presentAlert = true
+    @State private var username: String = ""
 
     @State private var isRecording = false
     @State private var isThinking = false
     
     var body: some View {
         
-            VStack {
-                ScrollViewReader { proxy in
+        VStack {
+            if !presentAlert {
+            UsernameHeaderView(username: username)
+            ScrollViewReader { proxy in
                 ScrollView {
                     LazyVStack {
                         ForEach(messages, id: \.self) { message in
@@ -43,7 +47,6 @@ struct ContentView: View {
                 
                 // send new message
                 HStack {
-                    
                     Button(action: {
                         if isRecording {
                             isRecording = false
@@ -60,29 +63,40 @@ struct ContentView: View {
                             Image(systemName: "mic.fill")
                         } else if isThinking {
                             LoadingButtonView()
+                                
                         } else {
                             Image(systemName: "mic")
                         }
                         
                     })
+                    .imageScale(.large)
+                    .controlSize(.large)
                     .buttonStyle(.borderedProminent)
                 }
                 .padding()
             }
         }
-        
+        }
+        // Username login
+        .alert("Login", isPresented: $presentAlert, actions: {
+                TextField("Username", text: $username)
+            
+            Button("Login", action: {}).disabled(username.isEmpty)
+            }, message: {
+                Text("Please choose your username")
+            })
         
         
     }
     
     func sendMessage(message: String) {
-        
+            textToSpeechService.stopSpeaking()
             messages.append(Message(content: message, isCurrentUser: true))
             DispatchQueue.main.async {
                 Task {
                     isThinking = true
-                    var response = await llmService.sendMessage(message: message)
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                    var response = await llmService.sendMessage(message: message, username: username)
+                    DispatchQueue.main.asyncAfter(deadline: .now()) {
                         messages.append(Message(content: response, isCurrentUser: false))
                         //Text to Speech usage
                         textToSpeechService.setContent(content: response)
