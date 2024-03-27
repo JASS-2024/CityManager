@@ -8,6 +8,9 @@
 import Foundation
 import SwiftUI
 
+
+let decoder = JSONDecoder()
+
 protocol LLMServiceProtocol {
     func sendMessage(message: String, username: String) async -> String
 }
@@ -64,6 +67,9 @@ class GPTLLMService: LLMServiceProtocol {
     
 
 class LLMService: LLMServiceProtocol {
+    
+    let link = "http://192.168.3.250/test"
+    
     func printJson<T: Codable>(_ elem: T) {
         let encoder = JSONEncoder()
         encoder.outputFormatting = .prettyPrinted
@@ -87,7 +93,7 @@ class LLMService: LLMServiceProtocol {
             print("Failed to create JSON from template")
             return "ERROR"
         }
-        let url = URL(string: "http://192.168.1.13/test")
+        let url = URL(string: link)
         var request = URLRequest(url: url!)
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
@@ -117,11 +123,14 @@ class LLMService: LLMServiceProtocol {
                 print("No response failed")
             }
             do {
-                let decoder = JSONDecoder()
+                
                 let decodedObject = try decoder.decode(ServerMessage.self, from: data)
                 result = decodedObject.text
             } catch {
                 print("Decoding failed")
+                if let str = String(data: data, encoding: .utf8){
+                    print(str)
+                }
             }
             return result
         } catch {
@@ -130,4 +139,5 @@ class LLMService: LLMServiceProtocol {
             
         }
     }
+    
 }
