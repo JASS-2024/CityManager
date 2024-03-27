@@ -59,7 +59,7 @@ struct ContentView: View {
                         if isRecording {
                             Image(systemName: "mic.fill")
                         } else if isThinking {
-                            Image(systemName: "circle.dashed")
+                            LoadingButtonView()
                         } else {
                             Image(systemName: "mic")
                         }
