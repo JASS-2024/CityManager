@@ -13,7 +13,7 @@ struct ContentView: View {
     @State var newMessage: String = "This is a new message"
     private var textToSpeechService = TextToSpeechService()
     @StateObject var speechRecognizer = SpeechRecognizer()
-    private var llmService = MockLLMService()
+    private var llmService = GPTLLMService()
 
     @State private var isRecording = false
     @State private var isThinking = false
