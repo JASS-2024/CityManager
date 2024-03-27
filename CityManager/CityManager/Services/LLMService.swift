@@ -96,35 +96,36 @@ class LLMService: LLMServiceProtocol {
         
         do {
             let clock = ContinuousClock()
+            var response: URLResponse? = nil
+            var data2: Data? = nil
             var time = try await clock.measure {
-                let (data, response) = try await URLSession.shared.data(for: request)
-                
-                if let httpResponse = response as? HTTPURLResponse {
-                    print("Response status code: \(httpResponse.statusCode)")
-                    
-                    // Check if the response indicates success (status code 200-299)
-                    if (200...299).contains(httpResponse.statusCode) {
-                        print("Posting succeeded")
-                    } else {
-                        print(Thread.callStackSymbols)
-                        print("Posting failed with status code: \(httpResponse.statusCode)")
-                    }
-                } else {
-                    print("No response failed")
-                }
-                do {
-                    let decoder = JSONDecoder()
-                    let decodedObject = try decoder.decode(ServerMessage.self, from: data)
-                    //printJson(decodedObject)
-                    result = decodedObject.text
-                } catch {
-                    print("Decoding failed")
-                }
+                (data2, response) = try await URLSession.shared.data(for: request)
             }
+            let data = data2!
             print("Time taken: " + time.description)
+
+            if let httpResponse = response as? HTTPURLResponse {
+                print("Response status code: \(httpResponse.statusCode)")
+                
+                // Check if the response indicates success (status code 200-299)
+                if (200...299).contains(httpResponse.statusCode) {
+                    print("Posting succeeded")
+                } else {
+                    print("Posting failed with status code: \(httpResponse.statusCode)")
+                }
+            } else {
+                print("No response failed")
+            }
+            do {
+                let decoder = JSONDecoder()
+                let decodedObject = try decoder.decode(ServerMessage.self, from: data)
+                result = decodedObject.text
+            } catch {
+                print("Decoding failed")
+            }
             return result
         } catch {
-            print("3")
+            print("Timing failed")
             return "ERROR"
             
         }
