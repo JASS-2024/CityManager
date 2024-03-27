@@ -14,10 +14,10 @@ struct UsernameHeaderView: View {
             Spacer()
             Text(username)
             Image(systemName: "person.fill")
-                .imageScale(.large)
+                .font(.system(size: 30))
             .padding(.trailing)
         }
-        .foregroundColor(/*@START_MENU_TOKEN@*/.blue/*@END_MENU_TOKEN@*/)
+        .foregroundColor(.secondary)
 
     }
 }

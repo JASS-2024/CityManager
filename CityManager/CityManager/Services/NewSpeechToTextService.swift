@@ -277,8 +277,6 @@ actor SpeechRecognizer: ObservableObject {
 
         }
 
-        
-
         if let result {
 
             transcribe(result.bestTranscription.formattedString)
