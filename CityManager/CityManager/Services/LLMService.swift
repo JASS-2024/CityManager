@@ -70,6 +70,22 @@ class LLMService: LLMServiceProtocol {
     
     let link = "http://192.168.3.250/test"
     
+    let plates = ["ABCD", "123", "AV2G"]
+    
+    let stopWords = ["cancel", "terminate", "abort", "halt", "stop", "end", "cease", "discontinue", "suspend", "quit", "not", "don't"]
+    
+    var plateString: String {
+        var string = ""
+        for plate in plates {
+            if plate == plates[0] {
+                string += plate
+            } else {
+                string += ", " + plate
+            }
+        }
+        return string
+    }
+    
     func printJson<T: Codable>(_ elem: T) {
         let encoder = JSONEncoder()
         encoder.outputFormatting = .prettyPrinted
