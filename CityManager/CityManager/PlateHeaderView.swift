@@ -13,11 +13,11 @@ struct PlateHeaderView: View {
             HStack {
                 Spacer()
                 Text(plate)
-                if !plate.isEmpty {
+                
                 Image(systemName: "car.fill")
                     .font(.system(size: 30))
                     .padding(.trailing)
-                }
+                    .opacity(plate.isEmpty ? 0 : 1)
             }
             .foregroundColor(.secondary)
 

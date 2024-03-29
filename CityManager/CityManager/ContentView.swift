@@ -7,11 +7,12 @@
 
 import Combine
 import SwiftUI
+import AVKit
 
 struct ContentView: View {
     @State var messages = DataSourceEmpty.messages
     @State var newMessage: String = "This is a new message"
-    private var textToSpeechService = TextToSpeechService()
+    @ObservedObject var textToSpeechService = TextToSpeechService()
     @StateObject var speechRecognizer = SpeechRecognizer()
     private var llmService = LLMService()
     @State private var presentAlert = false
@@ -26,10 +27,18 @@ struct ContentView: View {
     @State private var licensePlateAlert = false
     @State private var testPlateDialog = true
     
+   
+    
     var body: some View {
         
         VStack {
-                PlateHeaderView(plate: plate)
+            PlateHeaderView(plate: plate)
+                
+            GifImage(talking: textToSpeechService.isSpeaking)
+                .cornerRadius(15)
+                .padding(.horizontal)
+                .animation(.easeInOut(duration: 0.3), value: textToSpeechService.isSpeaking)
+            
                 ScrollViewReader { proxy in
                     ScrollView {
                         LazyVStack {
@@ -125,20 +134,6 @@ struct ContentView: View {
                 }
             }
         })
-        // License plate Alert
-        /*.alert("License plate", isPresented: $licensePlateAlert, actions: {
-            //Text("License plates I know: " + llmService.plateString)
-            TextField("Plate number", text: $intermediatePlate)
-            
-            Button("Save", action: {
-                savePlate(plate: intermediatePlate)
-            }).disabled(!Utils.plates.contains(intermediatePlate))
-            Button("Cancel", action: {
-                cancelPlateSelection()
-            })
-            }, message: {
-                Text("Please spell your license plate.")
-            })*/
     }
     
     @ViewBuilder

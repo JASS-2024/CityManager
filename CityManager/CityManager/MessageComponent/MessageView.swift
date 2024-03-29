@@ -14,16 +14,19 @@ struct MessageView : View {
     
     var body: some View {
         HStack(alignment: .bottom, spacing: 10) {
-            if !currentMessage.isCurrentUser {
-                Image("Avatar")
-                    .resizable()
-                    .frame(width: 40, height: 40, alignment: .center)
-                    .cornerRadius(20)
-            } else {
+            if currentMessage.isCurrentUser {
                 Spacer()
             }
-            MessageCell(contentMessage: currentMessage.content,
-                        isCurrentUser: currentMessage.isCurrentUser)
+            VStack (alignment: .leading, spacing: 10) {
+                if !currentMessage.isCurrentUser {
+                    Text("City Manager")
+                        .textCase(.uppercase)
+                        .font(.caption)
+                        .foregroundStyle(.gray)
+                }
+                MessageCell(contentMessage: currentMessage.content,
+                            isCurrentUser: currentMessage.isCurrentUser)
+            }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding()
