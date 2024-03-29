@@ -11,7 +11,8 @@ import SwiftUI
 struct CityManagerApp: App {
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            AvatarView()
+            //ContentView()
         }
     }
 }

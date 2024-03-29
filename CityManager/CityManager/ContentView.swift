@@ -138,7 +138,7 @@ struct ContentView: View {
         if message.isEmpty {
             return
         }
-        messages.append(Message(content: message, plate, self.plate, isCurrentUser: true))
+        //messages.append(Message(content: message, plate, self.plate, isCurrentUser: true))
         DispatchQueue.main.async {
             Task {
                 isThinking = true
