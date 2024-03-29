@@ -24,7 +24,6 @@ struct ContentView: View {
     @State private var isThinking = false
     @State private var gettingLicensePlate = false
     @State private var licensePlateAlert = false
-    @State private var testPlateDialog = true
     
     var body: some View {
         
@@ -124,21 +123,7 @@ struct ContentView: View {
                     PlateEntryView()
                 }
             }
-        })
-        // License plate Alert
-        /*.alert("License plate", isPresented: $licensePlateAlert, actions: {
-            //Text("License plates I know: " + llmService.plateString)
-            TextField("Plate number", text: $intermediatePlate)
-            
-            Button("Save", action: {
-                savePlate(plate: intermediatePlate)
-            }).disabled(!Utils.plates.contains(intermediatePlate))
-            Button("Cancel", action: {
-                cancelPlateSelection()
-            })
-            }, message: {
-                Text("Please spell your license plate.")
-            })*/
+        })    
     }
     
     @ViewBuilder
@@ -181,10 +166,9 @@ struct ContentView: View {
         DispatchQueue.main.async {
             Task {
                 isThinking = true
-                let response = "No server available"//await llmService.sendMessage(message: message, plate: self.plate)
+                let response = await llmService.sendMessage(message: message, plate: self.plate)
                 isThinking = false
-                if testPlateDialog/*response == "Licenceplate"*/ {
-                    testPlateDialog = false
+                if response == "LICENCEPLATE" {
                     getLicensePlate(originalMessage: message)
                 } else {
                    respondToUser(response: response)

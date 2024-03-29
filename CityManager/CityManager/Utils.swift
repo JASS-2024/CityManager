@@ -8,7 +8,7 @@
 import Foundation
 
 class Utils {
-    static let link = "http://192.168.3.250/test"
+    static let link = "http://192.168.3.75:8080/request"//"http://192.168.3.250/test"
     
     static let plates = ["ABCD", "123", "AV2G"]
     
