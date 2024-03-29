@@ -12,6 +12,7 @@ struct Message: Hashable {
     var id = UUID()
     var content: String
     var isCurrentUser: Bool
+    var plate: String?
 }
 
 struct DataSource {

@@ -5,7 +5,7 @@
 //  Created by Julian Kraus on 27.03.24.
 //
 
-import SwiftUI
+/*import SwiftUI
 import WhisperKit
 #if canImport(UIKit)
 import UIKit
@@ -1093,3 +1093,4 @@ struct WhisperView: View {
 #Preview {
     ContentView()
 }
+*/

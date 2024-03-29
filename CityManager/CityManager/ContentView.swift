@@ -14,21 +14,22 @@ struct ContentView: View {
     private var textToSpeechService = TextToSpeechService()
     @StateObject var speechRecognizer = SpeechRecognizer()
     private var llmService = LLMService()
-    @State private var presentAlert = true
+    @State private var presentAlert = false
     @State private var username: String = ""
     @State private var plate: String = ""
+    @State private var intermediatePlate = ""
     @State private var savedMessage: String?
 
     @State private var isRecording = false
     @State private var isThinking = false
     @State private var gettingLicensePlate = false
     @State private var licensePlateAlert = false
+    @State private var testPlateDialog = true
     
     var body: some View {
         
         VStack {
-            if !presentAlert {
-                UsernameHeaderView(username: username)
+                PlateHeaderView(plate: plate)
                 ScrollViewReader { proxy in
                     ScrollView {
                         LazyVStack {
@@ -55,27 +56,34 @@ struct ContentView: View {
                             if isRecording {
                                 isRecording = false
                                 DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-                                    newMessage = speechRecognizer.transcript
+                                    self.newMessage = speechRecognizer.transcript
                                     speechRecognizer.stopTranscribing()
+                                    if self.newMessage.isEmpty {
+                                        sendMessage(message: "???")
+                                        respondToUser(response: "I couldn't understand that, could you please repeat your question?")
+                                        return
+                                    } else {
+                                        sendMessage(message: newMessage)
+                                    }
                                     if gettingLicensePlate {
-                                        for plate in llmService.plates {
+                                        for plate in Utils.plates {
                                             if newMessage.contains(plate) {
                                                 savePlate(plate: plate)
                                                 return
                                             }
                                         }
-                                        for stopWord in llmService.stopWords {
+                                        for stopWord in Utils.stopWords {
                                             if newMessage.contains(stopWord) {
                                                 cancelPlateSelection()
                                                 return
                                             }
                                         }
                                         respondToUser(response: "Sorry, I didn't understand that. Would you mind spelling the license plate for me?")
-                                        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                                        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
                                             licensePlateAlert = true
                                         }
                                     } else {
-                                        sendMessage(message: speechRecognizer.transcript)
+                                        postMessage(message: speechRecognizer.transcript)
                                     }
                                 }
                                } else {
@@ -107,59 +115,97 @@ struct ContentView: View {
                     .padding(20)
                 }
             }
-        }
-        // Username login
-        /*.alert("Login", isPresented: $presentAlert, actions: {
-                TextField("Username", text: $username)
-            
-            Button("Login", action: {}).disabled(username.isEmpty)
-            }, message: {
-                Text("Please choose your username")
-            })*/
-        // Licenseplate Allert
-        .alert("License plate", isPresented: $licensePlateAlert, actions: {
-            Text("License plates I know: " + llmService.plateString)
-                TextField("Plate number", text: $plate)
+        .overlay(content: {
+            if licensePlateAlert {
+                ZStack {
+                    Rectangle()
+                        .fill(Color.gray.tertiary)
+                        .ignoresSafeArea()
+                    PlateEntryView()
+                }
+            }
+        })
+        // License plate Alert
+        /*.alert("License plate", isPresented: $licensePlateAlert, actions: {
+            //Text("License plates I know: " + llmService.plateString)
+            TextField("Plate number", text: $intermediatePlate)
             
             Button("Save", action: {
-                savePlate(plate: plate)
-            }).disabled(llmService.plates.contains(plate))
+                savePlate(plate: intermediatePlate)
+            }).disabled(!Utils.plates.contains(intermediatePlate))
             Button("Cancel", action: {
                 cancelPlateSelection()
             })
             }, message: {
-                Text("Please spell your license plate")
-            })
-        
-        
+                Text("Please spell your license plate.")
+            })*/
     }
     
-    func sendMessage(message: String) {
-        if message.isEmpty {
-            return
-        }
-        messages.append(Message(content: message, plate, self.plate, isCurrentUser: true))
+    @ViewBuilder
+    func PlateEntryView() -> some View {
+            ZStack {
+                RoundedRectangle(cornerRadius: 10)
+                    .fill(Color.white) // Adapts to the color scheme
+                    .shadow(color: .black.opacity(0.5), radius: 10, x: 0, y: 10)
+                VStack {
+                    Text("License Plate")
+                        .bold()
+                        .padding()
+                    TextField("Plate number", text: $intermediatePlate)
+                        .textFieldStyle(.roundedBorder)
+                        .padding()
+                    HStack {
+                        
+                        Button("Save") {
+                            sendMessage(message: intermediatePlate)
+                            savePlate(plate: intermediatePlate)
+                            licensePlateAlert = false // Dismiss the sheet
+                        }
+                        .padding()
+                        .disabled(!Utils.plates.contains(intermediatePlate))
+                        Button(action: {
+                            sendMessage(message: "Cancel")
+                            cancelPlateSelection()
+                            licensePlateAlert = false // Dismiss the sheet
+                        }, label: {
+                            Text("Cancel")
+                                .foregroundColor(.red)
+                        })
+                        .padding()
+                    }
+            }
+        }            .fixedSize()
+
+    }
+    func postMessage(message: String, send: Bool = true) {
         DispatchQueue.main.async {
             Task {
                 isThinking = true
-                let response = await llmService.sendMessage(message: message, username: username)
-                if response == "Licenceplate" {
+                let response = "No server available"//await llmService.sendMessage(message: message, plate: self.plate)
+                isThinking = false
+                if testPlateDialog/*response == "Licenceplate"*/ {
+                    testPlateDialog = false
                     getLicensePlate(originalMessage: message)
                 } else {
-                    isThinking = false
                    respondToUser(response: response)
                 }
             }
         }
     }
     
+    func sendMessage(message: String, isCurrentUser: Bool = true) {
+        messages.append(Message(content: message, isCurrentUser: isCurrentUser))
+    }
+    
     func savePlate(plate: String) {
         self.plate = plate
-        respondToUser(response: "I have saved the license plate " + plate + " for your current session")
+        self.intermediatePlate = ""
+        respondToUser(response: "I have saved the license plate " + plate + " for your current session.")
         if let message = savedMessage {
-            sendMessage(message: message)
+            postMessage(message: message, send: false)
+            savedMessage = nil
         }
-        gettingLicensePlate = false
+        self.gettingLicensePlate = false
     }
     
     func cancelPlateSelection() {
@@ -169,7 +215,8 @@ struct ContentView: View {
     
     func getLicensePlate(originalMessage: String) {
         gettingLicensePlate = true
-        respondToUser(response: "Sorry, for this request I need to in which car you currently are. Could you please tell me the license plate?")
+        savedMessage = originalMessage
+        respondToUser(response: "For this request I need to know in which car you currently are. Could you please tell me your license plate number?")
     }
     
     func respondToUser(response: String) {

@@ -9,27 +9,27 @@ import Foundation
 
 struct ServerMessage : Codable {
     var text: String
-    var username: String
+    var plate: String
     
     func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(self.text, forKey: .text)
-        try container.encode(self.username, forKey: .username)
+        try container.encode(self.plate, forKey: .plate)
     }
     
     enum CodingKeys: CodingKey {
         case text
-        case username
+        case plate
     }
     
     init(from decoder: any Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         self.text = try container.decode(String.self, forKey: .text)
-        self.username = ""
+        self.plate = ""
     }
     
-    init(text: String, username: String) {
+    init(text: String, plate: String) {
         self.text = text
-        self.username = username
+        self.plate = plate
     }
 }

@@ -12,18 +12,18 @@ import SwiftUI
 let decoder = JSONDecoder()
 
 protocol LLMServiceProtocol {
-    func sendMessage(message: String, username: String) async -> String
+    func sendMessage(message: String, plate: String) async -> String
 }
 
 class MockLLMService: LLMServiceProtocol {
-    func sendMessage(message: String, username: String) async -> String {
+    func sendMessage(message: String, plate: String) async -> String {
         return "Response to: " + message
     }
 }
 
 class GPTLLMService: LLMServiceProtocol {
 
-    func sendMessage(message: String, username: String) async -> String {
+    func sendMessage(message: String, plate: String) async -> String {
         let apiKey = ""
         let modelName = "gpt-4"
         
@@ -68,23 +68,7 @@ class GPTLLMService: LLMServiceProtocol {
 
 class LLMService: LLMServiceProtocol {
     
-    let link = "http://192.168.3.250/test"
-    
-    let plates = ["ABCD", "123", "AV2G"]
-    
-    let stopWords = ["cancel", "terminate", "abort", "halt", "stop", "end", "cease", "discontinue", "suspend", "quit", "not", "don't"]
-    
-    var plateString: String {
-        var string = ""
-        for plate in plates {
-            if plate == plates[0] {
-                string += plate
-            } else {
-                string += ", " + plate
-            }
-        }
-        return string
-    }
+
     
     func printJson<T: Codable>(_ elem: T) {
         let encoder = JSONEncoder()
@@ -100,21 +84,21 @@ class LLMService: LLMServiceProtocol {
 
     
     @MainActor
-    func sendMessage(message: String, username: String) async -> String {
+    func sendMessage(message: String, plate: String) async -> String {
         let encoder = JSONEncoder()
         encoder.outputFormatting = .prettyPrinted
-        var serverMessage = ServerMessage(text: message, username: username)
+        var serverMessage = ServerMessage(text: message, plate: plate)
         
         guard let createdJSON = try? encoder.encode(serverMessage) else {
             print("Failed to create JSON from template")
             return "ERROR"
         }
-        let url = URL(string: link)
+        let url = URL(string: Utils.link)
         var request = URLRequest(url: url!)
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.httpBody = createdJSON
-        var result = "ERRORERRORERRORERRORERRORERRORERRORERRORERRORERRORERRORERRORERRORERRORERRORERRORERRORERRORERRORERRORERRORERRORERRORERRORERRORERRORERRORERRORERROR"
+        var result = "Sorry I can't connect to the Server at the moment. Please try again later."
         
         do {
             let clock = ContinuousClock()
