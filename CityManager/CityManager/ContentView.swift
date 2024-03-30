@@ -34,6 +34,7 @@ struct ContentView: View {
             PlateHeaderView(plate: plate)
                 
             GifImage(talking: textToSpeechService.isSpeaking)
+                .scaledToFit()
                 .cornerRadius(15)
                 .padding(.horizontal)
                 .animation(.easeInOut(duration: 0.3), value: textToSpeechService.isSpeaking)
