@@ -1,8 +1,8 @@
 import SwiftUI
 import WebKit
 
-var talkingName = "talking_avatar_speed"
-var notTalkingName = "not_talking_avatar_speed"
+var talkingName = "talking_avatar_cut-2"
+var notTalkingName = "not_talking_avatar"
 
 struct GifImage: UIViewRepresentable {
     var talking: Bool // No longer a Binding
