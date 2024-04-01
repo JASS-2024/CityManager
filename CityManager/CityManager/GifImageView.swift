@@ -1,7 +1,7 @@
 import SwiftUI
 import WebKit
 
-var talkingName = "talking_avatar_copy"
+var talkingName = "talking_avatar_copy_resize"
 var notTalkingName = "not_talking_avatar_copy"
 
 struct GifImage: UIViewRepresentable {

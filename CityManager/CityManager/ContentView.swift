@@ -32,9 +32,10 @@ struct ContentView: View {
         
         VStack {
             PlateHeaderView(plate: plate)
-                
+            
+            
             GifImage(talking: textToSpeechService.isSpeaking)
-                .scaledToFit()
+                .scaledToFill()
                 .cornerRadius(15)
                 .padding(.horizontal)
                 .animation(.easeInOut(duration: 0.3), value: textToSpeechService.isSpeaking)
