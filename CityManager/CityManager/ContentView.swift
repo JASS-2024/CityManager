@@ -10,6 +10,7 @@ import SwiftUI
 import AVKit
 
 struct ContentView: View {
+    var userId = UUID().uuidString
     @State var messages = DataSourceEmpty.messages
     @State var newMessage: String = "This is a new message"
     @ObservedObject var textToSpeechService = TextToSpeechService()
@@ -187,7 +188,7 @@ struct ContentView: View {
         DispatchQueue.main.async {
             Task {
                 isThinking = true
-                let response = await llmService.sendMessage(message: message, plate: self.plate)
+                let response = await llmService.sendMessage(message: message, plate: self.plate, id: userId)
                 isThinking = false
                 if response == "LICENCEPLATE" {
                     getLicensePlate(originalMessage: message)

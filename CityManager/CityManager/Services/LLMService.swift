@@ -12,18 +12,18 @@ import SwiftUI
 let decoder = JSONDecoder()
 
 protocol LLMServiceProtocol {
-    func sendMessage(message: String, plate: String) async -> String
+    func sendMessage(message: String, plate: String, id: String) async -> String
 }
 
 class MockLLMService: LLMServiceProtocol {
-    func sendMessage(message: String, plate: String) async -> String {
+    func sendMessage(message: String, plate: String, id: String = "") async -> String {
         return "Response to: " + message
     }
 }
 
 class GPTLLMService: LLMServiceProtocol {
 
-    func sendMessage(message: String, plate: String) async -> String {
+    func sendMessage(message: String, plate: String, id: String = "") async -> String {
         let apiKey = ""
         let modelName = "gpt-4"
         
@@ -84,10 +84,10 @@ class LLMService: LLMServiceProtocol {
 
     
     @MainActor
-    func sendMessage(message: String, plate: String) async -> String {
+    func sendMessage(message: String, plate: String, id: String) async -> String {
         let encoder = JSONEncoder()
         encoder.outputFormatting = .prettyPrinted
-        var serverMessage = ServerMessage(text: message, plate: plate)
+        var serverMessage = ServerMessage(text: message, plate: plate, id: id)
         
         guard let createdJSON = try? encoder.encode(serverMessage) else {
             print("Failed to create JSON from template")
