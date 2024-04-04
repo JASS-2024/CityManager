@@ -100,3 +100,4 @@ Package.resolved
 # Ignore projectfiles now that they are generated
 *.xcodeproj
 *.xcworkspace
+**/.DS_Store
