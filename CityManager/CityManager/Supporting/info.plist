@@ -26,6 +26,14 @@
 	<string>1</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>This app requires access to the microphone for recording audio.</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>This app requires access to speech recognition for transcribing audio.</string>
+	<key>Privacy - Microphone Usage Description</key>
+	<string>We need access</string>
+	<key>Privacy - Speech Recognition Usage Description</key>
+	<string>We need access</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>
@@ -48,13 +56,5 @@
 	</array>
 	<key>UIUserInterfaceStyle</key>
 	<string>Automatic</string>
-	<key>NSMicrophoneUsageDescription</key>
-	<string>This app requires access to the microphone for recording audio.</string>
-	<key>NSSpeechRecognitionUsageDescription</key>
-	<string>This app requires access to speech recognition for transcribing audio.</string>
-	<key>Privacy - Speech Recognition Usage Description</key>
-	<string>We need access</string>
-	<key>Privacy - Microphone Usage Description</key>
-	<string>We need access</string>
 </dict>
 </plist>

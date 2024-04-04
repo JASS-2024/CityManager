@@ -15,7 +15,7 @@ struct Message: Hashable {
     var plate: String?
 }
 
-struct DataSource {
+struct DataSourceWithSamples {
     
     static let messages = [
         
@@ -32,8 +32,65 @@ struct DataSource {
     ]
 }
 
-struct DataSourceEmpty {
+class StateData: ObservableObject {
+    static let shared = StateData()
+    private init(){}
     
-    static var messages: [Message] = []
+    @Published var messages: [Message] = []
+    @Published var plate: String = ""
+    @Published var apnsToken: String = ""
+    @Published var hasSentTokenToServer = false
+    
+    struct TokenPayload: Codable{
+        let plate: String
+        let token: String
+        
+    }
+    func sendTokenToServer(payload: TokenPayload)async{
+        let data = try! encoder.encode(payload)
+        let url = URL(string: "http://\(Utils.LOCAL_CITY_SERVER_IP):8080/token")!
+        var r: URLRequest = .init(url: url)
+        r.httpMethod = "POST"
+        r.httpBody = data
+        r.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        
+        let (_, resp) = try! await URLSession.shared.data(for: r)
+        let httpResp = resp as! HTTPURLResponse
+        assert (httpResp.statusCode >= 200 && httpResp.statusCode < 300)
+        print("Sent token to server.")
+    }
+//    We can easily call this whenver we get the license plate or the token without doing any checking :p
+    func sendTokenToServerIfPossible()async{
+        guard let payload = hasTokenPayloadToSendToServer() else{
+            print("Can't send token to server yet.")
+            return
+        }
+        await sendTokenToServer(payload: payload)
+    }
+    func hasTokenPayloadToSendToServer() -> TokenPayload? {
+        if apnsToken != "" && plate != ""{
+            return .init(plate: plate, token: apnsToken)
+        }
+        return nil
+    }
+
+    //    in our case, this is logic to speak the message. set by the ContentView on app launch.
+    var logicAfterReceivingMessageFromApollo: (String)->() = {_ in
+        print("[EXTRA LOGIC DEFAULT!!!]")
+    }
+    
+    func addNewMessageThreadSafe(_ m: Message, doExtraLogic: Bool = false){
+        DispatchQueue.main.async{
+            withAnimation{
+                self.messages.append(m)
+                if doExtraLogic{
+                    self.logicAfterReceivingMessageFromApollo(m.content)
+                }
+            }
+        }
+    }
+    
 }
+
+
 

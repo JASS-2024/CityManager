@@ -11,14 +11,13 @@ import AVKit
 
 struct ContentView: View {
     var userId = UUID().uuidString
-    @State var messages = DataSourceEmpty.messages
+    @ObservedObject var dataSource = StateData.shared
     @State var newMessage: String = "This is a new message"
     @ObservedObject var textToSpeechService = TextToSpeechService()
     @StateObject var speechRecognizer = SpeechRecognizer()
     private var llmService = LLMService()
     @State private var presentAlert = false
     @State private var username: String = ""
-    @State private var plate: String = ""
     @State private var intermediatePlate = ""
     @State private var savedMessage: String?
     
@@ -32,26 +31,32 @@ struct ContentView: View {
     var body: some View {
         
         VStack {
-            PlateHeaderView(plate: plate)
+            PlateHeaderView(plate: dataSource.plate)
             
             Gif()
             
             ScrollViewReader { proxy in
                 ScrollView {
                     LazyVStack {
-                        ForEach(messages, id: \.self) { message in
+                        ForEach(dataSource.messages, id: \.self) { message in
                             MessageView(currentMessage: message)
                                 .id(message)
                         }
                     }
-                    .onReceive(Just(messages)) { _ in
+                    .onReceive(Just(dataSource.messages)) { _ in
                         withAnimation {
-                            proxy.scrollTo(messages.last, anchor: .bottom)
+                            proxy.scrollTo(dataSource.messages.last, anchor: .bottom)
                         }
                         
                     }.onAppear {
                         withAnimation {
-                            proxy.scrollTo(messages.last, anchor: .bottom)
+                            proxy.scrollTo(dataSource.messages.last, anchor: .bottom)
+                        }
+//                        tell the data source how to speak a new message
+                        dataSource.logicAfterReceivingMessageFromApollo = {
+                            print("[EXTRA LOGIC RUNNING]")
+                            textToSpeechService.setContent(content: $0)
+                            textToSpeechService.speak()
                         }
                     }
                 }
@@ -185,10 +190,11 @@ struct ContentView: View {
     }
     
     func postMessage(message: String, send: Bool = true) {
+        let plate = dataSource.plate
         DispatchQueue.main.async {
             Task {
                 isThinking = true
-                let response = await llmService.sendMessage(message: message, plate: self.plate, id: userId)
+                let response = await llmService.sendMessage(message: message, plate: plate, id: userId)
                 isThinking = false
                 if response == "LICENCEPLATE" {
                     getLicensePlate(originalMessage: message)
@@ -200,11 +206,16 @@ struct ContentView: View {
     }
     
     func sendMessage(message: String, isCurrentUser: Bool = true) {
-        messages.append(Message(content: message, isCurrentUser: isCurrentUser))
+        let message = Message(content: message, isCurrentUser: isCurrentUser)
+        dataSource.addNewMessageThreadSafe(message, doExtraLogic: true)
+        
     }
     
     func savePlate(plate: String) {
-        self.plate = plate
+        self.dataSource.plate = plate
+        Task{
+            await StateData.shared.sendTokenToServerIfPossible()
+        }
         self.intermediatePlate = ""
         respondToUser(response: "I have saved the license plate " + plate + " for your current session.")
         if let message = savedMessage {
@@ -226,11 +237,9 @@ struct ContentView: View {
     }
     
     func respondToUser(response: String) {
-        DispatchQueue.main.asyncAfter(deadline: .now()) {
-            messages.append(Message(content: response, isCurrentUser: false))
-            textToSpeechService.setContent(content: response)
-            textToSpeechService.speak()
-        }
+        let message = Message(content: response, isCurrentUser: false)
+//        this adds the message to our state and speaks it (the extra logic).
+        dataSource.addNewMessageThreadSafe(message, doExtraLogic: true)
     }
 }
 

@@ -7,8 +7,11 @@
 
 import Foundation
 
+
 class Utils {
-    static let link = "http://192.168.3.250:8080/request"//"http://192.168.3.250/test"
+//    static let LOCAL_CITY_SERVER_IP = "192.168.3.250"
+    static let LOCAL_CITY_SERVER_IP = "192.168.1.13"
+    static let link = "http://\(LOCAL_CITY_SERVER_IP):8080/request"//"http://192.168.3.250/test"
     
     static let plates = ["ABC123",
                          "ABC133",

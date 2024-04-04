@@ -10,6 +10,7 @@ import SwiftUI
 
 
 let decoder = JSONDecoder()
+let encoder = JSONEncoder()
 
 protocol LLMServiceProtocol {
     func sendMessage(message: String, plate: String, id: String) async -> String
