@@ -10,21 +10,20 @@ import SwiftUI
 
 
 let decoder = JSONDecoder()
-let encoder = JSONEncoder()
 
 protocol LLMServiceProtocol {
-    func sendMessage(message: String, plate: String, id: String) async -> String
+    func sendMessage(message: String, plate: String) async -> String
 }
 
 class MockLLMService: LLMServiceProtocol {
-    func sendMessage(message: String, plate: String, id: String = "") async -> String {
+    func sendMessage(message: String, plate: String) async -> String {
         return "Response to: " + message
     }
 }
 
 class GPTLLMService: LLMServiceProtocol {
 
-    func sendMessage(message: String, plate: String, id: String = "") async -> String {
+    func sendMessage(message: String, plate: String) async -> String {
         let apiKey = ""
         let modelName = "gpt-4"
         
@@ -85,10 +84,10 @@ class LLMService: LLMServiceProtocol {
 
     
     @MainActor
-    func sendMessage(message: String, plate: String, id: String) async -> String {
+    func sendMessage(message: String, plate: String) async -> String {
         let encoder = JSONEncoder()
         encoder.outputFormatting = .prettyPrinted
-        var serverMessage = ServerMessage(text: message, plate: plate, id: id)
+        var serverMessage = ServerMessage(text: message, plate: plate)
         
         guard let createdJSON = try? encoder.encode(serverMessage) else {
             print("Failed to create JSON from template")
@@ -99,7 +98,7 @@ class LLMService: LLMServiceProtocol {
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.httpBody = createdJSON
-        var result = "Sorry I didn't understand that. Could you please formulate it differently?"
+        var result = "Sorry I can't connect to the Server at the moment. Please try again later."
         
         do {
             let clock = ContinuousClock()
